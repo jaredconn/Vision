@@ -1,18 +1,22 @@
 package com.example.j.vision;
 
 
+import android.content.AsyncQueryHandler;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.support.v7.app.AppCompatActivity;
 
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 /**
@@ -30,19 +34,27 @@ public class PassPhoto extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pass_photo);
 
-        final ImageView IMG;
-        IMG = (ImageView) findViewById(R.id.img);
-
-        Intent intent = getIntent();
-        String path = intent.getStringExtra("path");
-        File imageFile = new File(path);
-        Bitmap myBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath()); //retrieving file
 
 
-        IMG.setImageBitmap(myBitmap);
+                final ImageView IMG;
+                IMG = (ImageView) findViewById(R.id.img);
 
+
+                Intent intent = getIntent();
+                String path = intent.getStringExtra("path");
+                File imageFile = new File(path);
+                Bitmap myBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath()); //retrieving file
+
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                myBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] byteArray = stream.toByteArray();
+
+                IMG.setImageBitmap(myBitmap);
+                // More code here
+            }
     }
-}
+
+
 
 
 
