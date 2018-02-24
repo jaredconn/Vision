@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Vision</string>
+    <string name="results">RESULTS</string>
+    <string name="todo">TODO</string>
 </resources>
