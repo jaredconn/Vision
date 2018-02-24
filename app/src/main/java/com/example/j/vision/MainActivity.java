@@ -14,7 +14,7 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyCPeO7TayOnyDMwaarp_HKV9g3guJN2qi4";
+    private static final String CLOUD_VISION_API_KEY = "";
     Button button;
 
     int REQUEST_CODE = 1;

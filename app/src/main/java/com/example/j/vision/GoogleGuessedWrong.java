@@ -12,6 +12,7 @@ import java.util.Map;
 
 /**
  * Created by J on 2/23/2018.
+ * receives the key / value pairs from google vision
  */
 
 public class GoogleGuessedWrong extends AppCompatActivity {
@@ -20,8 +21,6 @@ public class GoogleGuessedWrong extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gg_wrong);
-
-
 
        Intent intent = getIntent();
        final Map<String, Float> map = (Map<String, Float>) intent.getSerializableExtra("map");

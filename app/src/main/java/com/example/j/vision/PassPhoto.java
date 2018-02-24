@@ -1,7 +1,5 @@
 package com.example.j.vision;
 
-//https://developer.android.com/things/training/doorbell/cloud-vision.html
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -41,7 +39,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * adapted from https://developer.android.com/things/training/doorbell/cloud-vision.html
  * Created by jwc374 on 2/21/2018.
+ * displays the photo in ImageView
+ * compresses the bitmap and converts it to byteArray
+ * byte array gets passed to google
+ * switches between threads
+ *
+ * steps for using Vision api:
+ * 1) Construct the Vision API instance
+ * 2) Create the image request
+ * 3) Add the features we want
+ * 4) Batch and execute the request
+ * 5) Convert response into a readable collection of annotations
  */
 
 public class PassPhoto extends AppCompatActivity {
@@ -54,12 +64,8 @@ public class PassPhoto extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pass_photo);
 
-
         final ImageView IMG;
         IMG = (ImageView) findViewById(R.id.img);
-
-
-
 
         Intent intent = getIntent();
         String path = intent.getStringExtra("path");
@@ -71,7 +77,6 @@ public class PassPhoto extends AppCompatActivity {
         Bitmap rotatedBitmap = Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.getWidth(), myBitmap.getHeight(), matrix, true);
         //when placing a bitmap in image view from gallery, its rotated on its side :(
         IMG.setImageBitmap(rotatedBitmap);
-        //IMG.setImageBitmap(myBitmap);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -80,9 +85,7 @@ public class PassPhoto extends AppCompatActivity {
         final byte[] byteArray = stream.toByteArray();
 
 
-
-
-        //doing all this in a new thread
+        //start a new thread
         new Thread(new Runnable() {
             public void run() {
                 onPictureTaken(byteArray);
@@ -116,7 +119,6 @@ public class PassPhoto extends AppCompatActivity {
         BatchAnnotateImagesResponse response = vision.images().annotate(requestBatch).setDisableGZipContent(true).execute();
 
         return convertResponseToMap(response);
-        // More code here
     }
 
     private static Map<String, Float> convertResponseToMap(BatchAnnotateImagesResponse response) {
@@ -129,14 +131,11 @@ public class PassPhoto extends AppCompatActivity {
                 annotations.put(label.getDescription(), label.getScore());
             }
         }
-
         return annotations;
     }
 
         public void onPictureTaken(final byte[] imageBytes) {
             if (imageBytes != null) {
-
-
                 try {
                     // Process the image using Cloud Vision
                     final Map<String, Float> annotations = annotateImage(imageBytes);
@@ -145,8 +144,8 @@ public class PassPhoto extends AppCompatActivity {
                     //switch back to the main thread to access the textview
                     runOnUiThread(new Runnable(){
                         public void run() {
-                            // UI code goes here
 
+                            //find the highest likelihood match
                             String maxKey = null;
                             Float maxValue = Float.MIN_VALUE;
                             for (Map.Entry<String, Float> entry : annotations.entrySet()) {
@@ -160,19 +159,19 @@ public class PassPhoto extends AppCompatActivity {
                             Button yes = findViewById(R.id.yes);
                             Button no = findViewById(R.id.no);
 
-
-
+                            //this will be the top percentage result
                             tv.setText("Is this a(n) " + maxKey + "?");
 
+                            //this is a correct guess by google
                             yes.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     Intent intent = new Intent(PassPhoto.this, ResultClass.class);
-
                                     startActivity(intent); // starting next activity
                                 }
                             });
 
+                            //not a correct guess
                             no.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
@@ -181,11 +180,10 @@ public class PassPhoto extends AppCompatActivity {
                                     startActivity(intent); // starting next activity
                                 }
                             });
-
                         }
                     });
                 } catch (IOException e) {
-                    Log.e(TAG, "Cloud Vison API error: ", e);
+                    Log.e(TAG, "Cloud Vision API error: ", e);
                 }
             }
         }
