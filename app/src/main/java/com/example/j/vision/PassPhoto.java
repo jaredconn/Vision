@@ -2,24 +2,21 @@ package com.example.j.vision;
 
 //https://developer.android.com/things/training/doorbell/cloud-vision.html
 
-import android.app.Activity;
-import android.content.AsyncQueryHandler;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import android.graphics.Matrix;
-import android.os.AsyncTask;
+
 import android.os.Bundle;
 
 import android.support.v7.app.AppCompatActivity;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.HttpTransport;
@@ -37,6 +34,7 @@ import com.google.api.services.vision.v1.model.Image;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -49,9 +47,7 @@ import java.util.Map;
 public class PassPhoto extends AppCompatActivity {
 
     private static final String TAG = "PassPhoto.java";
-
     private static final String CLOUD_VISION_API_KEY = "AIzaSyCPeO7TayOnyDMwaarp_HKV9g3guJN2qi4";
-    // private static final MAX_LABEL_RESULTS = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +57,8 @@ public class PassPhoto extends AppCompatActivity {
 
         final ImageView IMG;
         IMG = (ImageView) findViewById(R.id.img);
+
+
 
 
         Intent intent = getIntent();
@@ -81,14 +79,13 @@ public class PassPhoto extends AppCompatActivity {
         myBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         final byte[] byteArray = stream.toByteArray();
 
-        final TextView tv = (TextView) findViewById(R.id.resultTv);
+
 
 
         //doing all this in a new thread
         new Thread(new Runnable() {
             public void run() {
-
-                DoorbellActivity.onPictureTaken(byteArray);
+                onPictureTaken(byteArray);
             }
         }).start();
     }
@@ -136,24 +133,64 @@ public class PassPhoto extends AppCompatActivity {
         return annotations;
     }
 
-    public static class DoorbellActivity extends Activity {
-
-        private static void onPictureTaken(final byte[] imageBytes) {
+        public void onPictureTaken(final byte[] imageBytes) {
             if (imageBytes != null) {
 
-                String a;
 
                 try {
                     // Process the image using Cloud Vision
-                    Map<String, Float> annotations = annotateImage(imageBytes);
+                    final Map<String, Float> annotations = annotateImage(imageBytes);
                     Log.d(TAG, "cloud vision annotations:" + annotations);
+
+                    //switch back to the main thread to access the textview
+                    runOnUiThread(new Runnable(){
+                        public void run() {
+                            // UI code goes here
+
+                            String maxKey = null;
+                            Float maxValue = Float.MIN_VALUE;
+                            for (Map.Entry<String, Float> entry : annotations.entrySet()) {
+                                Float value = entry.getValue();
+                                if (value > maxValue) {
+                                    maxKey = entry.getKey();
+                                    maxValue = value;
+                                }
+                            }
+                            final TextView tv = (TextView) findViewById(R.id.resultTv);
+                            Button yes = findViewById(R.id.yes);
+                            Button no = findViewById(R.id.no);
+
+
+
+                            tv.setText("Is this a(n) " + maxKey + "?");
+
+                            yes.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(PassPhoto.this, ResultClass.class);
+
+                                    startActivity(intent); // starting next activity
+                                }
+                            });
+
+                            no.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(PassPhoto.this, GoogleGuessedWrong.class);
+                                    intent.putExtra("map", (Serializable) annotations);
+                                    startActivity(intent); // starting next activity
+                                }
+                            });
+
+                        }
+                    });
                 } catch (IOException e) {
                     Log.e(TAG, "Cloud Vison API error: ", e);
                 }
             }
         }
     }
-}
+
 
 
 

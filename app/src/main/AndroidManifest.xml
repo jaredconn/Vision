@@ -21,7 +21,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".PassPhoto">
-
+        </activity>
+        <activity android:name=".ResultClass">
+        </activity>
+        <activity android:name=".GoogleGuessedWrong">
         </activity>
     </application>
 
