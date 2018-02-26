@@ -57,7 +57,7 @@ import java.util.Map;
 public class PassPhoto extends AppCompatActivity {
 
     private static final String TAG = "PassPhoto.java";
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyCPeO7TayOnyDMwaarp_HKV9g3guJN2qi4";
+    private static final String CLOUD_VISION_API_KEY = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
